@@ -2,11 +2,17 @@ var globalSocket;
 
 var numEventRows = 0;//number of event forms is initially zero
 
+var message_library;
+
 $(document).ready(function(){
 	/*$('#event_selector').change(function(){
 		//add_another_event_form();
 		pickEventFromList();
 	});*/
+
+	
+
+
 
 //triggered when the button "+Another Event" is pressed
 $("#button_for_more_events").unbind("click").click(function(){
@@ -32,8 +38,8 @@ $("#button_for_more_events").unbind("click").click(function(){
 	//Event Selector
 	var tmpEventSelector = document.createElement('select');	
 	tmpEventSelector.setAttribute('id', 'event_selector_'+numEventRows);
-	for(index in listEvents) {
-	    tmpEventSelector.options[tmpEventSelector.options.length] = new Option(listEvents[index], index);
+	for(index in message_library.listEvents) {
+	    tmpEventSelector.options[tmpEventSelector.options.length] = new Option(message_library.listEvents[index], index);
 	}
 	tmpEventSelector.setAttribute('onchange', 'pickEventFromList(this)');
 	document.getElementById('row_'+numEventRows).appendChild(tmpEventSelector);
@@ -74,6 +80,13 @@ function bindEvent(socket){
 	socket.on('connected', function(){
 		console.log('\n\n**connected');
 	});
+
+    socket.emit("requesting_list_events");
+   
+
+    socket.on("providing_list_events", function(data){
+    	message_library=data;
+    });
 };
 
 //triggered when a user presses "Send" on any of the event forms
@@ -149,19 +162,31 @@ function formatJson(val) {
 
 //triggered when a user selects what kind of event to be added/displayed
 function pickEventFromList(element) {
+    //fetch data from Meeting Info
+    var meetingName = document.getElementById("common_meeting_name").value;
+    var meetingID = document.getElementById("common_meeting_id").value;
+    var sessionID = document.getElementById("common_session").value;
+
+    //fetch info for what event was selected from dropdown
     var number = $(element).val();
-    var tmp = listEvents[element.selectedIndex];
+    var nameOfEvent = message_library.listEvents[element.selectedIndex];
 
-    //we extract the number of the section from the id. For example "event_selector_11" would yield "11"
-    var currentSectionNum = element.id.substring(15,element.id.length);
+	//we extract the number of the section: "event_selector_11" would yield "11"
+    var currentSectionNum = element.id.substring(15, element.id.length);
 
-	//we match the name of the event required and trigger the appropriate function to create such javascript Object and pass it!
-	if(number !=0)
-		document.getElementById("json_track_" + currentSectionNum).innerHTML = formatJson(returnJsonOf(tmp));
-	else
-	{
-		document.getElementById("json_track_" + currentSectionNum).innerHTML = "";
-	}
+    var socket = io.connect(window.location.protocol + "//" + window.location.host);
+    globalSocket = socket;
+
+    socket.emit("requestJsonForThisEvent", nameOfEvent, meetingName, meetingID, sessionID);
+
+    socket.on("providingJsonForThisEvent", function (json_text) { 
+        //we match the name of the event required and trigger the appropriate function to create such javascript Object and pass it!
+        if (number != 0) {
+            document.getElementById("json_track_" + currentSectionNum).innerHTML = formatJson(json_text); 
+        } else {
+            document.getElementById("json_track_" + currentSectionNum).innerHTML = "";
+        }
+    });
 };
 
 //triggered when the user selects "Clear fields" under the Meeting Info section

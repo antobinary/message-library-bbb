@@ -4,6 +4,7 @@
  var redis = require("redis");
  var redisClient;
  var PORT = 4000;
+ var message_library = require('message-library-bbb/message_library');
 
 //setting up server to run
  var app = express()
@@ -47,15 +48,25 @@ io.sockets.on('connection', function (socket) { // the actual socket callback
 		console.log("redis client connected");
 	});
 });
-
 	/*
 	*	binds socket events for which it will listen on
 	*	@param socket - the socket to transfer the events across 
 	*/
-function bindEvents(socket){
-	socket.on("sendJSON_anton", function (formInfoObj){
-		sendJSON(formInfoObj);		
-	});
+function bindEvents(socket) {
+    socket.on("sendJSON_anton", function (formInfoObj) {
+        sendJSON(formInfoObj);
+    });
+
+    //fetch list to populate dropdown for eventName selection
+    socket.on("requesting_list_events", function () {
+        socket.emit("providing_list_events", message_library);
+    });
+
+    //now that we have the eventName, produce the json (from module). Note that Meeting Info is also plugged in
+    socket.on("requestJsonForThisEvent", function (eventName, meetingName, meetingID, sessionID) {
+        var jsonForThisEvent = message_library.returnJsonOf(eventName, meetingName, meetingID, sessionID);
+        socket.emit("providingJsonForThisEvent", jsonForThisEvent);
+    });
 };
 
 	/*
