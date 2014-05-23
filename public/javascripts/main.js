@@ -2,6 +2,16 @@ var globalSocket;
 
 var numEventRows = 0;//number of event forms is initially zero
 var message_library;
+var available_events = {
+  0 : 'Please select an event type',
+  1 : 'whiteboard_draw_event',
+  2 : 'whiteboard_update_event',
+  3 : 'share_presentation_event_sample',
+  4 : 'page_changed_event_sample',
+  5 : 'user_joined_event',
+  6 : 'user_left_event',
+  7 : 'antom_custom'
+}
 
 $(document).ready(function () {
    //triggered when the button "+Another Event" is pressed
@@ -28,8 +38,8 @@ $(document).ready(function () {
         //Event Selector
         var tmpEventSelector = document.createElement('select');
         tmpEventSelector.setAttribute('id', 'event_selector_' + numEventRows);
-        for (var index in message_library.getEvents) {
-            tmpEventSelector.options[tmpEventSelector.options.length] = new Option(message_library.getEvents[index], index);
+        for (var index in available_events) {
+            tmpEventSelector.options[tmpEventSelector.options.length] = new Option(available_events[index], index);
         }
         tmpEventSelector.setAttribute('onchange', 'pickEventFromList(this)');
         document.getElementById('row_' + numEventRows).appendChild(tmpEventSelector);
@@ -222,8 +232,8 @@ function expand_shrink_div(element) {
 }
 //helper function for checking whether the eventType is one of the defined types in message_library
 function isPresentIn(str){
-    for(index in message_library.getEvents)
-        if (str == message_library.getEvents[index])
+    for(index in available_events)
+        if (str == available_events[index])
             return true;
     return false;
 }
