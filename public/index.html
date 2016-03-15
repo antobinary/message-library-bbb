@@ -16,7 +16,7 @@
         </tr>
         <tr>
           <td>Send message: 
-            <select id="messageTypeList">
+            <select id="messageTypeList" onchange="messageTypeOnChange(this.value)">
               <option selected disabled>message event type</option>
             </select>
           </td>

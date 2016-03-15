@@ -105,3 +105,12 @@ function clearMeetingInfo() {
     document.getElementById("common_meeting_id").value = "";
     document.getElementById("common_channel").value = "";
 }
+
+
+function messageTypeOnChange(selectedEventType) {
+  console.log(selectedEventType);
+  globalSocket.emit("prepare_json_for_event_type", {messageType: selectedEventType});
+  
+  
+}
+

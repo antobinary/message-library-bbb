@@ -1,8 +1,10 @@
 require "coffee-script"
-express = require "express"
-http    = require "http"
-path    = require "path"
-redis   = require "redis"
+express   = require "express"
+http      = require "http"
+path      = require "path"
+redis     = require "redis"
+fs        = require "fs"
+dummyjson = require "dummy-json"
 
 # message_library = require "bigbluebutton-messages/simple_message_library"
 message_library = [
@@ -94,7 +96,10 @@ bindEvents = (socket) ->
       " #{eventName} (to object); #{err}"
     )
 
-    
+  socket.on "prepare_json_for_event_type", (params) ->
+    eventType = params.messageType
+    console.log "got a request to prepare_json_for_event_type #{eventType}"
+    grabMessageTemplate(eventType)
 
   #TEMP
   socket.on "anton_custom", (channel, text) ->
@@ -109,3 +114,8 @@ helperDispatcher = (params, eventName) ->
     , ->
       console.log "this is onFailure #{eventName} (to json)"
     )
+
+grabMessageTemplate = (messageEventType) ->
+  template = fs.readFileSync("./templates/#{messageEventType}.hbs", {encoding: 'utf8'})
+  result = dummyjson.parse(template);
+  console.log result
