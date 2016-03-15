@@ -4,7 +4,17 @@ http    = require "http"
 path    = require "path"
 redis   = require "redis"
 
-message_library = require "bigbluebutton-messages/simple_message_library"
+# message_library = require "bigbluebutton-messages/simple_message_library"
+message_library = [
+  "create_meeting_request"
+  "message_one"
+  "message_two"
+]
+
+list_redis_channels = [
+  "redisChannel1"
+  "redisChannel2"
+]
 
 redisClient = undefined
 PORT = 4000
@@ -54,6 +64,9 @@ bindEvents = (socket) ->
   socket.on "requesting_list_events", ->
     socket.emit "providing_list_events", message_library
 
+  socket.on "requesting_list_redis_channels", () ->
+    socket.emit "providing_list_redis_channels", list_redis_channels
+    
   socket.on "populateField", (params, eventName, onSuccess) ->
     message_library["#{eventName}_to_json"](params, ((json)->
       console.log "this is onSuccess #{eventName} (to json)"
@@ -80,6 +93,8 @@ bindEvents = (socket) ->
       console.log "this is onFailure provideJavaScriptObject:" + 
       " #{eventName} (to object); #{err}"
     )
+
+    
 
   #TEMP
   socket.on "anton_custom", (channel, text) ->

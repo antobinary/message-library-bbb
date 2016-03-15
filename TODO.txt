@@ -1,0 +1,2 @@
+
+-pick the redis channels from an array, not hardcoded like now 
