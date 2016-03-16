@@ -1,5 +1,4 @@
 var globalSocket;
-
 var message_library;
 var redis_channels;
 
@@ -8,8 +7,6 @@ $(document).ready(function () {
   var socket = io.connect(window.location.protocol + "//" + window.location.host);
   globalSocket = socket;
   bindEvent(socket);
-  
-
 });
 
 /*
@@ -50,6 +47,11 @@ function bindEvent(socket) {
       }
     });
     
+    socket.on("use_this_json", function (data) {
+      console.log(data.jsonString)
+      var formattedJson = formatJson(data.jsonString);
+      document.getElementById("jsonEditArea").innerHTML = formattedJson;
+    });
 }
 //triggered when a user presses "Send" on any of the event forms
 function sendJsonPressed(element) {
@@ -110,7 +112,5 @@ function clearMeetingInfo() {
 function messageTypeOnChange(selectedEventType) {
   console.log(selectedEventType);
   globalSocket.emit("prepare_json_for_event_type", {messageType: selectedEventType});
-  
-  
 }
 

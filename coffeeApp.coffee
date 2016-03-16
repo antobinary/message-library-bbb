@@ -18,8 +18,9 @@ list_redis_channels = [
   "redisChannel2"
 ]
 
-redisClient = undefined
-PORT = 4000
+redisClient  = null
+PORT         = 4000
+globalSocket = null
 
 #setting up server to run
 app = express()
@@ -52,6 +53,7 @@ server.listen PORT
 io.sockets.on "connection", (socket) -># the actual socket callback
   bindEvents socket
   socket.emit "connected"
+  globalSocket = socket
   console.log "socket connected"
 
   #once the socket is connected, connect to the redis client
@@ -68,14 +70,14 @@ bindEvents = (socket) ->
 
   socket.on "requesting_list_redis_channels", () ->
     socket.emit "providing_list_redis_channels", list_redis_channels
-    
-  socket.on "populateField", (params, eventName, onSuccess) ->
-    message_library["#{eventName}_to_json"](params, ((json)->
-      console.log "this is onSuccess #{eventName} (to json)"
-      onSuccess (json)
-    ), (e) ->
-      console.log "this is onFailure populateField: #{eventName} (to json) + #{e}"
-    )
+  #   
+  # socket.on "populateField", (params, eventName, onSuccess) ->
+  #   message_library["#{eventName}_to_json"](params, ((json)->
+  #     console.log "this is onSuccess #{eventName} (to json)"
+  #     onSuccess (json)
+  #   ), (e) ->
+  #     console.log "this is onFailure populateField: #{eventName} (to json) + #{e}"
+  #   )
   
   socket.on "sendEventManual", (params) ->
     params = JSON.parse params
@@ -101,12 +103,6 @@ bindEvents = (socket) ->
     console.log "got a request to prepare_json_for_event_type #{eventType}"
     grabMessageTemplate(eventType)
 
-  #TEMP
-  socket.on "anton_custom", (channel, text) ->
-    #channel = "bigbluebutton:meeting:anton"
-    console.log "injecting in channel #{channel} #{text}"
-    redisClient.publish "#{channel}", text
-
 helperDispatcher = (params, eventName) ->
     message_library["#{eventName}_to_json"](params, (json)->
       console.log "this is onSuccess #{eventName} *(to json)"
@@ -117,5 +113,10 @@ helperDispatcher = (params, eventName) ->
 
 grabMessageTemplate = (messageEventType) ->
   template = fs.readFileSync("./templates/#{messageEventType}.hbs", {encoding: 'utf8'})
-  result = dummyjson.parse(template);
+  result = dummyjson.parse(template)
   console.log result
+  
+  globalSocket.emit "use_this_json", {
+    messageEventType: messageEventType
+    jsonString: result
+  }
