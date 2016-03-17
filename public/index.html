@@ -21,36 +21,26 @@
             </select>
           </td>
         </tr>
-        <tr>
-          <td> to channel: 
-            <select id="redisChannelList">
-              <option selected disabled> redis channel</option>
-            </select>
-          </td>
-        </tr>
-        <!-- <tr>
-          <td>Meeting Name: 
-            <input id="common_meeting_name" type="text" style="width: 250px">
-          </td>
-        </tr> -->
-        <tr>
-          <td>meetingId: 
-            <input id="common_meeting_id" type="text" style="width: 250px">
-          </td>
-        </tr>
-        <tr>
-          <td>userId: 
-            <input id="common_user_id" type="text" style="width: 250px">
-          </td>
-        </tr>
       </th>
     </table>
-    <input id="clear_meeting_info" type="button" value="Clear fields" onclick="return clearMeetingInfo();">
-    <input id="plug_common_values" type="button" value="Override values" onclick="plugCommonValues();">
     <h2>Send Event JSON</h2>
 
     <div id="jsonEditArea" contenteditable="true" style="auto; width:600px;">
     </div>
+    <div>
+      <p>Plug other values:</p>
+      <p>meetingId: <input id="common_meeting_id" type="text" style="width: 250px"></p>
+      <p>userId: <input id="common_user_id" type="text" style="width: 250px"></p>
+      <input id="clear_meeting_info" type="button" value="Clear fields" onclick="return clearMeetingInfo();">
+      <input id="plug_common_values" type="button" value="Override values" onclick="plugCommonValues();">
+    </div>
+    <div> Send to this redis channel:
+      <select id="redisChannelList">
+        <option selected disabled> redis channel</option>
+      </select>
+      <input id="send_to_redis" type="button" value="Send to redis" onclick="sendToRedis();">
+    </div>
+    
     <script src="javascripts/main.js"></script>
     <script src="javascripts/helpers.js"></script>
   </body>

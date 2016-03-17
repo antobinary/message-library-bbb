@@ -1,8 +1,7 @@
-var globalSocket;
-var message_library;
-var redis_channels;
-var unformattedJsonString;
-var formattedJsonString;
+var globalSocket = null;
+var message_library = null;
+var redis_channels = null;
+var unformattedJsonString = null;
 
 $(document).ready(function () {
   //connect to correct socket
@@ -52,13 +51,12 @@ function bindEvent(socket) {
     socket.on("use_this_json", function (data) {
       // console.log(data.jsonString)
       unformattedJsonString = data.jsonString;
-      formattedJsonString = formatJson(data.jsonString);
       displayJsonInField();
     });
 }
 
 function displayJsonInField() {
-  document.getElementById("jsonEditArea").innerHTML = formattedJsonString;
+  document.getElementById("jsonEditArea").innerHTML = formatJson(unformattedJsonString);
 }
 
 function messageTypeOnChange(selectedEventType) {
@@ -75,7 +73,18 @@ function plugCommonValues() {
   }
   // console.log(jsonObj);
   unformattedJsonString = JSON.stringify(jsonObj);
-  formattedJsonString = formatJson(unformattedJsonString);
   displayJsonInField();
 }
 
+function sendToRedis() {
+  var channelToSendTo = document.getElementById("redisChannelList").value;
+  
+  //avoid the default option
+  if("redis channel" != channelToSendTo) {
+    console.log("sending to redis on channel:" + channelToSendTo);
+    globalSocket.emit("send_to_redis", {
+      "channel": channelToSendTo,
+      "json":unformattedJsonString
+    });
+  }
+}

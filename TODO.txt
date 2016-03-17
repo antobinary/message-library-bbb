@@ -1,5 +1,6 @@
 
--pick the redis channels from an array, not hardcoded like now 
 -have a security mech in case the event type does not exist
 -send the event to redis on the specified channel
+-if the visible json is modified it has to be checked and stored
+-strip new lines from template?
 -

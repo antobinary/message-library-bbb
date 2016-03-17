@@ -9,13 +9,10 @@ dummyjson = require "dummy-json"
 # message_library = require "bigbluebutton-messages/simple_message_library"
 message_library = [
   "create_meeting_request"
-  "message_one"
-  "message_two"
 ]
 
 list_redis_channels = [
-  "redisChannel1"
-  "redisChannel2"
+  "bigbluebutton:to-bbb-apps:meeting"
 ]
 
 redisClient  = null
@@ -79,15 +76,15 @@ bindEvents = (socket) ->
   #     console.log "this is onFailure populateField: #{eventName} (to json) + #{e}"
   #   )
   
-  socket.on "sendEventManual", (params) ->
-    params = JSON.parse params
-    eventName = params.header.name
-    message_library.validateEventJSON(params, eventName, (json)->
-      console.log "this is onSuccess #{eventName} *(to json)"
-      redisClient.publish "bigbluebutton:bridge", json
-    , ->
-      console.log "this is onFailure #{eventName} (to json)"
-    )
+  # socket.on "sendEventManual", (params) ->
+  #   params = JSON.parse params
+  #   eventName = params.header.name
+  #   message_library.validateEventJSON(params, eventName, (json)->
+  #     console.log "this is onSuccess #{eventName} *(to json)"
+  #     redisClient.publish "bigbluebutton:bridge", json
+  #   , ->
+  #     console.log "this is onFailure #{eventName} (to json)"
+  #   )
 
   socket.on "provideJavascriptObject", (params, eventName, onSuccess) ->
     message_library.convertAndValidateJSON(params, eventName, ((jObject)->
@@ -102,14 +99,20 @@ bindEvents = (socket) ->
     eventType = params.messageType
     console.log "got a request to prepare_json_for_event_type #{eventType}"
     grabMessageTemplate(eventType)
+    
+  socket.on "send_to_redis", (params) ->
+    if params.channel? and params.json?
+      console.log "about to send to redis (on channel #{params.channel}) the following:  #{params.json} "
+      redisClient.publish params.channel, params.json
 
-helperDispatcher = (params, eventName) ->
-    message_library["#{eventName}_to_json"](params, (json)->
-      console.log "this is onSuccess #{eventName} *(to json)"
-      redisClient.publish "bigbluebutton:bridge", json
-    , ->
-      console.log "this is onFailure #{eventName} (to json)"
-    )
+
+# helperDispatcher = (params, eventName) ->
+#     message_library["#{eventName}_to_json"](params, (json)->
+#       console.log "this is onSuccess #{eventName} *(to json)"
+#       redisClient.publish "bigbluebutton:bridge", json
+#     , ->
+#       console.log "this is onFailure #{eventName} (to json)"
+#     )
 
 grabMessageTemplate = (messageEventType) ->
   template = fs.readFileSync("./templates/#{messageEventType}.hbs", {encoding: 'utf8'})
@@ -120,3 +123,5 @@ grabMessageTemplate = (messageEventType) ->
     messageEventType: messageEventType
     jsonString: result
   }
+  
+  
