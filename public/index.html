@@ -15,7 +15,7 @@
           </td>
         </tr>
         <tr>
-          <td>Send message: 
+          <td>Type of message to send: 
             <select id="messageTypeList" onchange="messageTypeOnChange(this.value)">
               <option selected disabled>message event type</option>
             </select>
@@ -40,16 +40,18 @@
         </tr>
         <tr>
           <td>userId: 
-            <input id="common_meeting_id" type="text" style="width: 250px">
+            <input id="common_user_id" type="text" style="width: 250px">
           </td>
         </tr>
       </th>
     </table>
     <input id="clear_meeting_info" type="button" value="Clear fields" onclick="return clearMeetingInfo();">
+    <input id="plug_common_values" type="button" value="Override values" onclick="plugCommonValues();">
     <h2>Send Event JSON</h2>
 
     <div id="jsonEditArea" contenteditable="true" style="auto; width:600px;">
     </div>
     <script src="javascripts/main.js"></script>
+    <script src="javascripts/helpers.js"></script>
   </body>
 </html>

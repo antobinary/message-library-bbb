@@ -1,3 +1,5 @@
 
 -pick the redis channels from an array, not hardcoded like now 
+-have a security mech in case the event type does not exist
+-send the event to redis on the specified channel
 -

@@ -1,6 +1,8 @@
 var globalSocket;
 var message_library;
 var redis_channels;
+var unformattedJsonString;
+var formattedJsonString;
 
 $(document).ready(function () {
   //connect to correct socket
@@ -48,69 +50,32 @@ function bindEvent(socket) {
     });
     
     socket.on("use_this_json", function (data) {
-      console.log(data.jsonString)
-      var formattedJson = formatJson(data.jsonString);
-      document.getElementById("jsonEditArea").innerHTML = formattedJson;
+      // console.log(data.jsonString)
+      unformattedJsonString = data.jsonString;
+      formattedJsonString = formatJson(data.jsonString);
+      displayJsonInField();
     });
 }
-//triggered when a user presses "Send" on any of the event forms
-function sendJsonPressed(element) {
-  console.log(element);
+
+function displayJsonInField() {
+  document.getElementById("jsonEditArea").innerHTML = formattedJsonString;
 }
-// formatJson() :: formats and indents JSON string FROM http://ketanjetty.com/coldfusion/javascript/format-json/
-function formatJson(val) {
-    var retval = '';
-    var str = val;
-    var pos = 0;
-    var strLen = str.length;
-    var indentStr = '&nbsp;&nbsp;&nbsp;&nbsp;';
-    var newLine = '<br />';
-    var char = '';
-
-    for (var i = 0; i < strLen; i++) {
-        char = str.substring(i, i + 1);
-
-        if (char == '}' || char == ']') {
-            retval = retval + newLine;
-            pos = pos - 1;
-
-            for (var j = 0; j < pos; j++) {
-                retval = retval + indentStr;
-            }
-        }
-
-        retval = retval + char;
-
-        if (char == '{' || char == '[' || char == ',') {
-            retval = retval + newLine;
-
-            if (char == '{' || char == '[') {
-                pos = pos + 1;
-            }
-
-            for (var k = 0; k < pos; k++) {
-                retval = retval + indentStr;
-            }
-        }
-    }
-
-    return retval;
-}
-//triggered when a user selects what kind of event to be added/displayed
-function pickEventFromList(element) {
-  console.log("pickEventFromList selected");
-  console.log(element);
-}
-//triggered when the user selects "Clear fields" under the Meeting Info section
-function clearMeetingInfo() {
-    document.getElementById("common_meeting_name").value = "";
-    document.getElementById("common_meeting_id").value = "";
-    document.getElementById("common_channel").value = "";
-}
-
 
 function messageTypeOnChange(selectedEventType) {
   console.log(selectedEventType);
   globalSocket.emit("prepare_json_for_event_type", {messageType: selectedEventType});
+}
+
+function plugCommonValues() {
+  // console.log("unformattedJsonString="+unformattedJsonString);
+  var jsonObj = JSON.parse(unformattedJsonString);
+  jsonObj.payload.meeting_id = document.getElementById("common_meeting_id").value;
+  if(undefined != jsonObj.payload.userid) {
+    jsonObj.payload.userid = document.getElementById("common_user_id").value;
+  }
+  // console.log(jsonObj);
+  unformattedJsonString = JSON.stringify(jsonObj);
+  formattedJsonString = formatJson(unformattedJsonString);
+  displayJsonInField();
 }
 
